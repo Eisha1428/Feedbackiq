@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeedbackIQ — Customer Feedback Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080b12;--surface:#0e1420;--surface2:#131926;--surface3:#1a2235;
+    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+    --accent:#00e5a0;--accent-dim:rgba(0,229,160,0.12);--accent-glow:rgba(0,229,160,0.25);
+    --coral:#ff6b6b;--coral-dim:rgba(255,107,107,0.12);
+    --amber:#ffb547;--amber-dim:rgba(255,181,71,0.12);
+    --blue:#4d9fff;--blue-dim:rgba(77,159,255,0.12);
+    --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.12);
+    --text:#f0f4ff;--text2:#8a94a6;--text3:#4a5568;
+    --radius:14px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(0,229,160,0.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
+  .page-wrap{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:0 24px 80px;}
+  header{padding:36px 0 48px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-mark{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .logo-mark svg{width:18px;height:18px;}
+  .logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--text);letter-spacing:-0.02em;}
+  .logo-text span{color:var(--accent);}
+  .header-badge{background:var(--accent-dim);border:1px solid rgba(0,229,160,0.2);color:var(--accent);font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;}
+  .hero{text-align:center;margin-bottom:48px;padding:0 16px;}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);margin-bottom:20px;}
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
+  .hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(26px,5vw,44px);line-height:1.1;letter-spacing:-0.03em;color:var(--text);margin-bottom:16px;}
+  .hero h1 em{font-style:normal;color:var(--accent);}
+  .hero p{color:var(--text2);font-size:16px;max-width:520px;margin:0 auto;font-weight:300;}
+  .how-it-works{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px;}
+  .step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;}
+  .step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:0.4;}
+  .step-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+  .step-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .step-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+  .main-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;overflow:hidden;margin-bottom:24px;}
+  .card-header{padding:24px 28px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .card-header-left h2{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+  .card-header-left p{font-size:13px;color:var(--text2);margin-top:2px;}
+  .sample-btn{background:var(--surface3);border:1px solid var(--border2);color:var(--text2);font-size:12px;font-family:'DM Sans',sans-serif;padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;}
+  .sample-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--accent);}
+  .card-body{padding:24px 28px;}
+  .samples-section{margin-bottom:20px;}
+  .samples-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+  .samples-grid{display:flex;gap:8px;flex-wrap:wrap;}
+  .sample-tag{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:6px 12px;border-radius:20px;cursor:pointer;transition:all 0.2s;}
+  .sample-tag:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+  textarea{width:100%;min-height:180px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.7;padding:16px;resize:vertical;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+  textarea::placeholder{color:var(--text3);}
+  .textarea-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:10px;}
+  .char-count{font-size:12px;color:var(--text3);}
+  .analyze-btn{background:var(--accent);color:#080b12;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.02em;padding:12px 28px;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .analyze-btn:hover{background:#00ffb3;transform:translateY(-1px);box-shadow:0 8px 24px var(--accent-glow);}
+  .analyze-btn:active{transform:translateY(0);}
+  .analyze-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
+  .analyze-btn svg{width:16px;height:16px;}
+  .category-banner{display:none;margin-top:12px;border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;line-height:1.5;align-items:flex-start;gap:10px;}
+  .category-banner.show{display:flex;animation:fadeUp 0.3s ease;}
+  .category-banner svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;}
+  .category-banner.warn{background:rgba(255,181,71,0.1);border:1px solid rgba(255,181,71,0.3);color:var(--amber);}
+  .category-banner.danger{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);color:var(--coral);}
+  .category-banner.info{background:rgba(77,159,255,0.1);border:1px solid rgba(77,159,255,0.3);color:var(--blue);}
+  .category-banner.purple{background:var(--purple-dim);border:1px solid rgba(167,139,250,0.3);color:var(--purple);}
+  .loading-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-top:16px;display:none;}
+  .loading-bar.active{display:block;}
+  .loading-bar-fill{height:100%;background:var(--accent);border-radius:2px;animation:loading 1.5s ease-in-out infinite;}
+  @keyframes loading{0%{width:0%;margin-left:0;}50%{width:60%;margin-left:20%;}100%{width:0%;margin-left:100%;}}
+  .loading-status{text-align:center;font-size:13px;color:var(--text2);margin-top:12px;display:none;}
+  .loading-status.active{display:block;}
+  #results{display:block;}
+  #results.visible{display:block;animation:fadeUp 0.4s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .results-divider{border:none;border-top:1px solid var(--border);margin:0 28px;}
+  .results-body{padding:28px;}
+  .results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .results-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .results-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;}
+  .timestamp{font-size:12px;color:var(--text3);}
+  .export-btn{background:var(--surface3);border:1px solid var(--border2);color:var(--text2);font-size:12px;font-family:'DM Sans',sans-serif;padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+  .export-btn:hover{background:var(--surface2);color:var(--accent);border-color:var(--accent);}
+  .export-btn svg{width:13px;height:13px;}
+  .export-copied{color:var(--accent)!important;border-color:var(--accent)!important;background:var(--accent-dim)!important;}
+  .cat-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:4px 10px;border-radius:20px;margin-bottom:16px;}
+  .cat-pill.normal{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(0,229,160,0.25);}
+  .cat-pill.weak{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(255,181,71,0.25);}
+  .cat-pill.mixed{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(77,159,255,0.25);}
+  .cat-pill.multilang{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,0.25);}
+  .cat-pill.garbage{background:var(--coral-dim);color:var(--coral);border:1px solid rgba(255,107,107,0.25);}
+  /* ── LAYOUT ENFORCEMENT: lock all result boxes ── */
+  #normalResults{width:100%;min-width:0;}
+  .score-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px;width:100%;}
+  .score-card{
+    background:var(--surface2);
+    border:1px solid var(--border2);
+    border-radius:var(--radius);
+    padding:16px;
+    text-align:center;
+    min-width:0;
+    overflow:hidden;
+    word-break:break-word;
+    display:block;
+    visibility:visible;
+  }
+  .score-card .val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--text);line-height:1;display:block;}
+  .score-card .val sup{font-size:12px;color:var(--text2);font-weight:400;}
+  .score-card .lbl{font-size:10px;color:var(--text2);margin-top:6px;text-transform:uppercase;letter-spacing:0.05em;display:block;}
+  .score-card .sub{font-size:11px;color:var(--text2);margin-top:3px;display:block;}
+  .score-bar{height:5px;border-radius:3px;background:var(--surface3);margin-top:10px;overflow:hidden;display:block;}
+  .score-bar-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);display:block;}
+  .score-bar-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
+  .tone-card{border-radius:var(--radius);padding:16px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px;}
+  .tone-card.satisfied{background:rgba(0,229,160,0.07);border:1px solid rgba(0,229,160,0.2);}
+  .tone-card.neutral{background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.2);}
+  .tone-card.frustrated{background:rgba(255,181,71,0.08);border:1px solid rgba(255,181,71,0.25);}
+  .tone-card.angry{background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25);}
+  .tone-card.dissatisfied{background:rgba(255,50,50,0.1);border:2px solid rgba(255,107,107,0.4);}
+  .tone-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
+  .tone-body{min-width:0;flex:1;}
+  .tone-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+  .tone-label.satisfied{color:var(--accent);}
+  .tone-label.neutral{color:var(--blue);}
+  .tone-label.frustrated{color:var(--amber);}
+  .tone-label.angry{color:var(--coral);}
+  .tone-label.dissatisfied{color:#ff4444;}
+  .tone-reason{font-size:13px;color:var(--text2);line-height:1.6;word-break:break-word;}
+  .themes-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:20px;width:100%;}
+  .theme-panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;min-width:0;overflow:hidden;word-break:break-word;}
+  .theme-panel.urgent{border-color:rgba(255,107,107,0.4);background:rgba(255,107,107,0.04);}
+  .theme-panel-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .theme-panel-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .theme-panel-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .theme-panel-label.urgent{color:var(--coral);}
+  .theme-item{display:flex;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);min-width:0;}
+  .theme-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+  .theme-rank{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;min-width:20px;flex-shrink:0;margin-top:2px;}
+  .theme-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;word-break:break-word;}
+  .theme-detail{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.5;word-break:break-word;}
+  .emotion-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;width:100%;min-width:0;overflow:hidden;}
+  .emotion-card.urgent{background:rgba(255,50,50,0.08);border:2px solid rgba(255,107,107,0.35);}
+  .emotion-card.moderate{background:rgba(255,181,71,0.08);border:1px solid rgba(255,181,71,0.3);}
+  .emotion-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .emotion-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .emotion-icon.urgent{background:rgba(255,107,107,0.15);}
+  .emotion-icon.moderate{background:rgba(255,181,71,0.15);}
+  .emotion-label{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;}
+  .emotion-label.urgent{color:#ff6b6b;}
+  .emotion-label.moderate{color:var(--amber);}
+  .emotion-text{font-size:13px;color:var(--text2);line-height:1.7;word-break:break-word;}
+  .emotion-impact{margin-top:8px;font-size:13px;font-weight:500;word-break:break-word;}
+  .emotion-impact.urgent{color:#ff8080;}
+  .emotion-impact.moderate{color:var(--amber);}
+  .action-card{border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;width:100%;min-width:0;overflow:hidden;}
+  .action-card.normal{background:linear-gradient(135deg,rgba(0,229,160,0.07),rgba(0,229,160,0.03));border:1px solid rgba(0,229,160,0.2);}
+  .action-card.urgent{background:linear-gradient(135deg,rgba(255,107,107,0.1),rgba(255,107,107,0.04));border:2px solid rgba(255,107,107,0.35);}
+  .action-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .action-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .action-icon.normal{background:var(--accent-dim);}
+  .action-icon.urgent{background:rgba(255,107,107,0.15);}
+  .action-icon svg{width:14px;height:14px;}
+  .action-label{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;}
+  .action-label.normal{color:var(--accent);}
+  .action-label.urgent{color:var(--coral);}
+  .action-text{font-size:14px;line-height:1.7;word-break:break-word;}
+  .action-text.normal{color:#c0e8d8;}
+  .action-text.urgent{color:#ffb3b3;}
+  .disclaimer-box{display:flex;align-items:flex-start;gap:10px;background:rgba(77,159,255,0.07);border:1px solid rgba(77,159,255,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:4px;width:100%;min-width:0;overflow:hidden;}
+  .disclaimer-box svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;}
+  .disclaimer-text{font-size:12px;color:#7aaddd;line-height:1.6;word-break:break-word;min-width:0;}
+  .disclaimer-text strong{color:#9ec8f0;font-weight:500;}
+  .invalid-card{background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.25);border-radius:var(--radius);padding:24px;text-align:center;}
+  .invalid-card h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--coral);margin-bottom:8px;}
+  .invalid-card p{font-size:13px;color:var(--text2);line-height:1.6;}
+  .feedback-section{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:28px;margin-bottom:24px;overflow:hidden;}
+  .feedback-header{margin-bottom:20px;}
+  .feedback-header h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .feedback-header p{font-size:13px;color:var(--text2);}
+  .rating-label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;}
+  .rating-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:20px;width:100%;}
+  .rating-btn{
+    background:var(--surface2);
+    border:1px solid var(--border2);
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    transition:all 0.2s;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:12px 8px;
+    gap:4px;
+    width:100%;
+    min-width:0;
+  }
+  .rating-btn:hover{background:var(--accent-dim);border-color:var(--accent);}
+  .rating-btn.active{background:var(--accent-dim);border-color:var(--accent);}
+  .rating-btn .r-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text2);transition:color 0.2s;line-height:1;}
+  .rating-btn:hover .r-num,.rating-btn.active .r-num{color:var(--accent);}
+  .rating-btn .r-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .rating-btn:hover .r-lbl,.rating-btn.active .r-lbl{color:var(--accent);}
+  .feedback-form{display:flex;flex-direction:column;gap:12px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  input[type="text"],input[type="email"]{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+  input::placeholder{color:var(--text3);}
+  .submit-btn{background:var(--surface3);border:1px solid var(--border2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;padding:12px 24px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;align-self:flex-start;}
+  .submit-btn:hover{background:var(--accent);color:#080b12;border-color:var(--accent);}
+  .feedback-success{background:var(--accent-dim);border:1px solid rgba(0,229,160,0.25);border-radius:var(--radius-sm);padding:14px 18px;color:var(--accent);font-size:14px;display:none;align-items:center;gap:10px;}
+  .feedback-success.show{display:flex;animation:fadeUp 0.3s ease;}
+  footer{text-align:center;padding:24px 0 0;border-top:1px solid var(--border);color:var(--text3);font-size:12px;}
+  footer span{color:var(--text2);}
+  @media(max-width:700px){.how-it-works{grid-template-columns:1fr;}.score-row{grid-template-columns:1fr 1fr;}.themes-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}.card-body,.results-body{padding:18px;}.card-header{padding:18px;}header{padding:24px 0 32px;}.hero h1{font-size:26px;}}
+  @media(max-width:420px){.score-row{grid-template-columns:1fr 1fr;}.page-wrap{padding:0 14px 60px;}}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <header>
+    <div class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 18 18" fill="none"><path d="M9 2L11.5 7H16L12 10.5L13.5 16L9 13L4.5 16L6 10.5L2 7H6.5L9 2Z" fill="#080b12"/></svg></div>
+      <span class="logo-text">Feedback<span>IQ</span></span>
+    </div>
+    <div class="header-badge">MBA BUS 631 &middot; Option A</div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-eyebrow"><div class="dot"></div>AI-powered business intelligence</div>
+    <h1>Turn customer feedback into<br><em>actionable insights</em></h1>
+    <p>Paste reviews, survey responses, or support tickets &mdash; get sentiment scores, emotion tone, themes, and a recommended action plan.</p>
+  </div>
+
+  <div class="how-it-works">
+    <div class="step-card"><div class="step-num">Step 01</div><div class="step-title">Paste your reviews</div><div class="step-desc">Copy and paste customer reviews, survey responses, or support tickets into the text area.</div></div>
+    <div class="step-card"><div class="step-num">Step 02</div><div class="step-title">Click Analyze</div><div class="step-desc">The engine classifies input type, scores sentiment, detects emotion tone, and extracts themes.</div></div>
+    <div class="step-card"><div class="step-num">Step 03</div><div class="step-title">Act on results</div><div class="step-desc">Use the structured output &mdash; sentiment, themes, and emotion insight &mdash; to make urgent or strategic decisions.</div></div>
+  </div>
+
+  <div class="main-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h2>Paste your customer feedback</h2>
+        <p>Supports normal reviews, short inputs, mixed language, contradictory text, or garbage &mdash; all classified automatically</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="samples-section">
+        <div class="samples-title">Try a scenario</div>
+        <div class="samples-grid">
+          <span class="sample-tag" onclick="loadScenario('ecommerce')">E-commerce</span>
+          <span class="sample-tag" onclick="loadScenario('saas')">SaaS product</span>
+          <span class="sample-tag" onclick="loadScenario('restaurant')">Restaurant</span>
+          <span class="sample-tag" onclick="loadScenario('angry')">Angry customers</span>
+          <span class="sample-tag" onclick="loadScenario('mixed')">Mixed / confusing</span>
+          <span class="sample-tag" onclick="loadScenario('short')">Short / weak</span>
+          <span class="sample-tag" onclick="loadScenario('multilang')">Multi-language</span>
+          <span class="sample-tag" onclick="loadScenario('garbage')">Garbage input</span>
+        </div>
+      </div>
+      <textarea id="reviewInput" placeholder="Paste your customer reviews here..." oninput="updateCount()"></textarea>
+      <div class="category-banner" id="categoryBanner">
+        <svg id="bannerIcon" viewBox="0 0 15 15" fill="none"></svg>
+        <span id="bannerText"></span>
+      </div>
+      <div class="textarea-footer">
+        <span class="char-count" id="charCount">0 characters &middot; 0 words</span>
+        <button class="analyze-btn" id="analyzeBtn" onclick="analyzeText()">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M8 1L10 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H6L8 1Z" fill="currentColor"/></svg>
+          Analyze Feedback
+        </button>
+      </div>
+      <div class="loading-bar" id="loadingBar"><div class="loading-bar-fill"></div></div>
+      <div class="loading-status" id="loadingStatus">Classifying input and analyzing sentiment...</div>
+    </div>
+
+    <div id="results">
+      <hr class="results-divider">
+      <div class="results-body">
+        <div class="results-header">
+          <div class="results-header-left">
+            <span class="results-title">Analysis Results</span>
+            <span class="timestamp" id="analysisTime"></span>
+          </div>
+          <button class="export-btn" id="exportBtn" onclick="copyResults()">
+            <svg viewBox="0 0 13 13" fill="none"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 3V2.5A1.5 1.5 0 015.5 1h5A1.5 1.5 0 0112 2.5v5A1.5 1.5 0 0110.5 9H10" stroke="currentColor" stroke-width="1.2"/></svg>
+            Copy Results
+          </button>
+        </div>
+
+        <div id="catPillWrap"></div>
+        <div id="invalidCard" class="invalid-card" style="display:none;"></div>
+        <div id="normalResults">
+          <div class="score-row">
+            <div class="score-card">
+              <div class="val" id="scoreVal">&mdash;</div>
+              <div class="lbl">Sentiment Score</div>
+              <div class="sub" id="scoreLabel">awaiting input</div>
+              <div class="score-bar"><div class="score-bar-fill" id="scoreBarFill" style="width:0%;"></div></div>
+            </div>
+            <div class="score-card">
+              <div class="val" id="reviewCount">&mdash;</div>
+              <div class="lbl">Reviews</div>
+              <div class="sub">analyzed</div>
+            </div>
+            <div class="score-card">
+              <div class="val" id="confidenceVal">&mdash;</div>
+              <div class="lbl">Confidence</div>
+              <div class="sub" id="confidenceSub">awaiting input</div>
+            </div>
+            <div class="score-card">
+              <div class="val" id="themesCount">&mdash;</div>
+              <div class="lbl">Themes</div>
+              <div class="sub" id="themesSub">awaiting input</div>
+            </div>
+          </div>
+
+          <div class="tone-card neutral" id="toneCard">
+            <div class="tone-icon" id="toneIcon">😐</div>
+            <div class="tone-body">
+              <div class="tone-label neutral" id="toneLabel">Customer Tone</div>
+              <div class="tone-reason" id="toneReason">Tone will appear here after analysis.</div>
+            </div>
+          </div>
+
+          <div class="themes-grid">
+            <div class="theme-panel" id="posPanel">
+              <div class="theme-panel-header"><div class="theme-panel-dot" style="background:#00e5a0;"></div><span class="theme-panel-label">Positive Themes</span></div>
+              <div id="posThemes"><div style="font-size:13px;color:var(--text3);font-style:italic;padding:8px 0;">Themes will appear here after analysis.</div></div>
+            </div>
+            <div class="theme-panel" id="negPanel">
+              <div class="theme-panel-header"><div class="theme-panel-dot" style="background:#ff6b6b;"></div><span class="theme-panel-label" id="negPanelLabel">Complaint Themes</span></div>
+              <div id="negThemes"><div style="font-size:13px;color:var(--text3);font-style:italic;padding:8px 0;">Themes will appear here after analysis.</div></div>
+            </div>
+          </div>
+
+          <div class="emotion-card" id="emotionCard" style="display:none;">
+            <div class="emotion-header"><div class="emotion-icon" id="emotionIcon"></div><span class="emotion-label" id="emotionLabel">Customer Emotion Insight</span></div>
+            <div class="emotion-text" id="emotionText"></div>
+            <div class="emotion-impact" id="emotionImpact"></div>
+          </div>
+
+          <div class="action-card normal" id="actionCard">
+            <div class="action-card-header">
+              <div class="action-icon normal" id="actionIcon"><svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px;"><path d="M7 1L8.5 5H13L9.5 7.5L11 12L7 9.5L3 12L4.5 7.5L1 5H5.5L7 1Z" fill="#00e5a0"/></svg></div>
+              <span class="action-label normal" id="actionLabel">Recommended Action</span>
+            </div>
+            <div class="action-text normal" id="actionText">Recommended action will appear here after analysis.</div>
+          </div>
+
+          <div class="disclaimer-box">
+            <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#4d9fff" stroke-width="1.2"/><path d="M7 6.5V10" stroke="#4d9fff" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="4.5" r="0.6" fill="#4d9fff"/></svg>
+            <span class="disclaimer-text"><strong>AI-generated output &mdash; human review required.</strong> This tool uses keyword-based analysis and may misclassify negations, sarcasm, or non-English text. Results are estimates only and should not be the sole basis for business decisions.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-section">
+    <div class="feedback-header">
+      <h3>Rate this tool</h3>
+      <p>Your feedback helps improve FeedbackIQ. Takes 30 seconds.</p>
+    </div>
+    <div class="rating-label">How useful did you find this tool?</div>
+    <div class="rating-grid" id="ratingRow">
+      <button class="rating-btn" onclick="selectRating(this,1)">
+        <span class="r-num">1</span><span class="r-lbl">Poor</span>
+      </button>
+      <button class="rating-btn" onclick="selectRating(this,2)">
+        <span class="r-num">2</span><span class="r-lbl">Fair</span>
+      </button>
+      <button class="rating-btn" onclick="selectRating(this,3)">
+        <span class="r-num">3</span><span class="r-lbl">Good</span>
+      </button>
+      <button class="rating-btn" onclick="selectRating(this,4)">
+        <span class="r-num">4</span><span class="r-lbl">Great</span>
+      </button>
+      <button class="rating-btn" onclick="selectRating(this,5)">
+        <span class="r-num">5</span><span class="r-lbl">Excellent</span>
+      </button>
+    </div>
+    <div class="feedback-form" id="feedbackForm">
+      <div class="form-row">
+        <input type="text" id="fbName" placeholder="Your name (optional)">
+        <input type="email" id="fbEmail" placeholder="Email (optional)">
+      </div>
+      <textarea id="fbComment" style="min-height:90px;" placeholder="What did you like? What could be improved?"></textarea>
+      <button class="submit-btn" onclick="submitFeedback()">Submit feedback</button>
+    </div>
+    <div class="feedback-success" id="feedbackSuccess">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#00e5a0" stroke-width="1.5"/><path d="M5.5 9L7.5 11L12.5 6.5" stroke="#00e5a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Thank you! Your feedback has been recorded.
+    </div>
+  </div>
+
+  <footer>
+    <p>Built for <span>BUS 631 &middot; Strategic AI for Modern Business</span> &middot; William Jessup University &middot; Spring 2026</p>
+    <p style="margin-top:6px;">Powered by <span>Claude AI (Anthropic)</span> &middot; Instructor: <span>Ray Bryant</span></p>
+  </footer>
+</div>
+
+<script>
+const scenarios={
+  ecommerce:`The product quality is excellent and the design is beautiful. I really like how easy it is to use.\nDelivery was slower than expected and the packaging was slightly damaged when it arrived.\nCustomer support responded quickly and was very helpful in resolving my issue.\nOverall I am satisfied but there is definitely room for improvement in delivery speed.\nGreat value for the price. Would recommend to friends and family.\nMy order arrived missing one item. Had to contact support which took 3 days to resolve.`,
+  saas:`The dashboard is incredibly intuitive. My team picked it up in under an hour with zero training.\nReporting features are powerful but the export options are very limited compared to competitors.\nCustomer success team is outstanding — proactive check-ins and genuinely helpful onboarding.\nThe mobile app crashes frequently on iOS 17. This is a major blocker for our field team.\nLoading times during peak hours are unacceptably slow. We have had client demos disrupted.`,
+  restaurant:`Best pasta I have had outside of Italy. The chef clearly knows what they are doing.\nService was extremely slow on a Friday night. Waited 45 minutes for our appetizers.\nThe ambiance is fantastic — perfect for a date night. Lighting and music are spot on.\nFood quality has dropped noticeably over the last few months. Very disappointing for a loyal customer.\nDesserts are absolutely worth saving room for. The tiramisu is extraordinary.`,
+  angry:`This is the worst product I have ever bought. Completely broken on arrival. Absolute garbage.\nI have contacted support five times and nobody responded. Never again will I shop here.\nThe packaging was destroyed and the item was damaged. Totally unacceptable.\nI want a full refund. This company does not care about its customers at all.\nWasted my money. Do not buy from this company. Worst experience of my life.`,
+  mixed:`The product is good but also bad at the same time. I liked it but I also hated it.\nExcellent quality yet terrible quality. Fast delivery but also very slow.\nI would recommend it but I would also not recommend it. Happy and unhappy.\nGreat customer service but also the worst customer service I have experienced.`,
+  short:`Good.\nBad.\nOk product.\nNot great.`,
+  multilang:`The product quality is excellent and delivery was fast.\nLe service client est terrible et le produit est arrive endommage.\nEl producto es bueno pero el envio fue muy lento.\nProduct bahut accha hai lekin delivery bahut slow thi.\nSupport team is helpful but response time needs improvement.`,
+  garbage:`asdfgh jkl qwerty 12345 zxcvbn mnbvcx\nxyz abc 999 !!!! @@@ ### $$$\nrandom words banana helicopter purple tuesday`
+};
+
+function loadSample(){document.getElementById('reviewInput').value=scenarios.ecommerce;updateCount();}
+function loadScenario(k){document.getElementById('reviewInput').value=scenarios[k];updateCount();document.getElementById('reviewInput').scrollIntoView({behavior:'smooth',block:'center'});}
+function updateCount(){const v=document.getElementById('reviewInput').value;document.getElementById('charCount').textContent=v.length.toLocaleString()+' characters \u00b7 '+(v.trim()?v.trim().split(/\s+/).length:0).toLocaleString()+' words';}
+
+const posWords=['excellent','great','amazing','good','love','fantastic','perfect','best','wonderful','outstanding','easy','helpful','fast','quick','beautiful','clean','friendly','impressive','smooth','efficient','intuitive','clear','recommend','satisfied','enjoy','pleased','awesome','superb','brilliant','delightful','happy','nice','pleasant','exceptional'];
+const negWords=['bad','poor','terrible','awful','slow','broken','damaged','missing','wrong','issue','problem','disappointed','worse','horrible','unacceptable','frustrating','difficult','confusing','expensive','late','crash','error','wait','limited','complaint','rude','useless','mediocre','garbage','disaster','ignored','worst','pathetic','dreadful','disgusting','failure','refund','angry'];
+const negations=["not","no","never","wasn't","isn't","aren't","doesn't","didn't","couldn't","wouldn't","shouldn't","hardly","barely"];
+
+function isGarbage(text){
+  const words=text.trim().split(/\s+/).filter(w=>w.length>1);
+  const vowelRatio=(text.match(/[aeiou]/gi)||[]).length/Math.max(text.replace(/\s/g,'').length,1);
+  const symbolRatio=(text.match(/[^a-zA-Z0-9\s.,!?'"-]/g)||[]).length/Math.max(text.length,1);
+  const realWords=['the','a','an','is','was','it','this','that','product','service','quality','delivery','support','good','bad','price','recommend','experience','purchase','order','item','shipping','team','staff','excellent','terrible','amazing','horrible','great','poor'];
+  const realWordCount=words.filter(w=>realWords.includes(w.toLowerCase().replace(/[^a-z]/g,''))).length;
+  if(words.length<3) return true;
+  if(vowelRatio<0.08&&words.length<20) return true;
+  if(symbolRatio>0.25&&words.length<15) return true;
+  if(words.length>4&&realWordCount===0) return true;
+  return false;
+}
+
+function isConfusing(text){
+  const lower=text.toLowerCase();
+  const pairs=[['good','bad'],['excellent','terrible'],['love','hate'],['fast','slow'],['helpful','useless'],['best','worst'],['happy','unhappy'],['amazing','horrible'],['satisfied','dissatisfied'],['liked','hated'],['perfect','awful']];
+  return pairs.filter(function(p){return lower.includes(p[0])&&lower.includes(p[1]);}).length>=2;
+}
+
+function scoreText(text){
+  const tokens=text.toLowerCase().split(/\s+/);
+  var pos=0,neg=0;
+  for(var i=0;i<tokens.length;i++){
+    var w=tokens[i].replace(/[^a-z']/g,'');
+    var negated=(i>0&&negations.includes(tokens[i-1].replace(/[^a-z']/g,'')))||(i>1&&negations.includes(tokens[i-2].replace(/[^a-z']/g,'')))||(i>2&&negations.includes(tokens[i-3].replace(/[^a-z']/g,'')));
+    if(posWords.includes(w)){negated?neg++:pos++;}
+    if(negWords.includes(w)){negated?pos++:neg+=1.3;}
+  }
+  return{pos:pos,neg:neg};
+}
+
+function classifyInput(text){
+  if(isGarbage(text)) return 'garbage';
+  if(isConfusing(text)) return 'confusing';
+  var s=scoreText(text);
+  var total=s.pos+s.neg||1;
+  var ratio=s.pos/total;
+  if(ratio>=0.70) return 'positive';
+  if(ratio<=0.30) return 'negative';
+  return 'mixed';
+}
+
+const posThemeKw={'Product quality':['quality','excellent','great product','well made','durable','build','premium','outstanding'],'Ease of use':['easy','intuitive','user-friendly','simple','straightforward','navigate','seamless'],'Customer support':['support','helpful','responsive','quick response','resolved','team'],'Value for money':['value','price','worth','affordable','fair','deal','recommend'],'Design & aesthetics':['design','beautiful','look','appearance','clean','aesthetic','ambiance'],'Speed & efficiency':['fast','quick','efficient','smooth','instant','rapid'],'Staff & service':['friendly','staff','attentive','professional','welcoming','polite']};
+const negThemeKw={'Slow delivery':['slow','late','delay','shipping','delivery','wait','arrived late','took too long'],'Product issues':['broken','damaged','defective','missing','wrong','malfunction','fell apart','stopped working'],'Poor support':['unresponsive','ignored','unhelpful','no response','days to respond','no reply','nobody responded'],'Pricing concerns':['expensive','overpriced','not worth','rip off','waste of money'],'Quality decline':['quality dropped','worse','disappointed','not what expected','misleading','downhill'],'Technical problems':['bug','error','crash','glitch','not working','technical','slow loading','freezes'],'Service issues':['rude','unfriendly','unprofessional','poor service','attitude','dismissive','never again']};
+
+function extractKeyThemes(text,kwObj){
+  var lower=text.toLowerCase();
+  var sentences=text.split(/[.!?\n]+/).map(function(s){return s.trim();}).filter(function(s){return s.length>6;});
+  var found=[];
+  for(var theme in kwObj){
+    var words=kwObj[theme];var count=0;var evidence='';
+    words.forEach(function(w){if(lower.includes(w)){count++;if(!evidence){var s=sentences.find(function(sen){return sen.toLowerCase().includes(w);});if(s)evidence=s.length>80?s.substring(0,80)+'...':s;}}});
+    if(count>0)found.push({theme:theme,evidence:evidence||'Mentioned in feedback.'});
+  }
+  return found.slice(0,3);
+}
+
+function detectTone(text,category){
+  if(category==='garbage'||category==='confusing') return null;
+  var lower=text.toLowerCase();
+  var angry=['never again','worst ever','absolutely terrible','i want a refund','do not buy','garbage','scam','furious','outraged'];
+  var frustrated=['disappointed','frustrating','no response','unacceptable','very slow','kept waiting','been waiting'];
+  var dissatisfied=['terrible','horrible','awful','worst','broken','useless','waste of money','total failure'];
+  var aC=angry.filter(function(s){return lower.includes(s);}).length;
+  var fC=frustrated.filter(function(s){return lower.includes(s);}).length;
+  var dC=dissatisfied.filter(function(s){return lower.includes(s);}).length;
+  if(category==='positive') return 'satisfied';
+  if(aC>=2||dC>=2) return 'dissatisfied';
+  if(aC>=1) return 'angry';
+  if(fC>=1||dC>=1) return 'frustrated';
+  if(category==='mixed') return 'neutral';
+  return 'satisfied';
+}
+
+function getToneConfig(tone){
+  var cfg={satisfied:{icon:'😊',label:'Satisfied',cls:'satisfied',reason:'Customers express contentment and appreciation. Positive words dominate.'},neutral:{icon:'😐',label:'Neutral',cls:'neutral',reason:'Feedback is balanced. Customers acknowledge both sides without strong emotion.'},frustrated:{icon:'😤',label:'Frustrated',cls:'frustrated',reason:'Customers show frustration due to unmet expectations or unresolved issues.'},angry:{icon:'😠',label:'Angry',cls:'angry',reason:'Strong negative language. Customers express clear anger and loss of trust.'},dissatisfied:{icon:'🤬',label:'Highly Dissatisfied',cls:'dissatisfied',reason:'Customers are severely unhappy. Extreme signals indicate complete failure.'}};
+  return cfg[tone]||cfg.neutral;
+}
+
+function runAnalysis(text){
+  var category=classifyInput(text);
+  var s=scoreText(text);
+  var total=s.pos+s.neg||1;
+  var sentimentScore=Math.min(10,Math.max(1,Math.round(2+(s.pos/total)*8)));
+  var reviewCount=Math.max(text.split(/\n+/).filter(function(r){return r.trim().length>8;}).length,1);
+  var words=text.trim().split(/\s+/).length;
+  var confidence=words<10?'Low':words<25?'Medium':'High';
+  var tone=detectTone(text,category);
+  var isNegativeTone=(tone==='angry'||tone==='dissatisfied'||tone==='frustrated');
+  var posThemes=[],negThemes=[],sentimentLabel='',response='',action='';
+
+  if(category==='garbage'){
+    sentimentLabel='Garbage';
+    response='GARBAGE — This input does not contain real customer feedback. Random characters, symbols, or meaningless text cannot be analyzed.';
+    action='Please paste actual customer reviews, survey responses, or support tickets.';
+  } else if(category==='confusing'){
+    sentimentLabel='Confusing';
+    posThemes=extractKeyThemes(text,posThemeKw);
+    negThemes=extractKeyThemes(text,negThemeKw);
+    response='The feedback contains strong contradictions. The customer expresses both positive and negative opinions about the same aspects, making the true sentiment unclear.';
+    action='This feedback cannot be used for strategic decisions. Recommend following up with the customer to clarify their actual experience.';
+  } else if(category==='positive'){
+    sentimentLabel='Positive';
+    posThemes=extractKeyThemes(text,posThemeKw);
+    negThemes=[];
+    response='The feedback is entirely positive. No complaint signals detected. Customers express clear satisfaction and appreciation.';
+    action='Maintain and amplify current strengths. Use this positive sentiment for testimonials, referral programs, and marketing.';
+  } else if(category==='negative'){
+    sentimentLabel='Negative';
+    posThemes=[];
+    negThemes=extractKeyThemes(text,negThemeKw);
+    response='The feedback is entirely negative. No meaningful positive signals detected. Customers express clear dissatisfaction and complaints.';
+    var topNeg=negThemes[0]?negThemes[0].theme:'the identified issues';
+    var urgentMap={'Slow delivery':'Audit and fix the fulfillment pipeline immediately.','Product issues':'Overhaul quality control. Defective products are destroying brand trust.','Poor support':'Establish response time SLAs now. Customers feel abandoned.','Pricing concerns':'Reframe value communication strategy urgently.','Technical problems':'Escalate stability fixes to top engineering priority.','Service issues':'Immediate staff retraining required.','Quality decline':'Conduct urgent product quality audit.'};
+    action=(urgentMap[topNeg]||'Address the identified critical failures immediately.')+' No positive signals exist to offset this dissatisfaction.';
+    if(isNegativeTone) action='URGENT: '+action;
+  } else {
+    sentimentLabel='Mixed';
+    posThemes=extractKeyThemes(text,posThemeKw);
+    negThemes=extractKeyThemes(text,negThemeKw);
+    response='The feedback contains both positive and negative sentiments. Customers acknowledge strengths while also reporting complaints. Both sides must be addressed.';
+    var tNeg=negThemes[0]?negThemes[0].theme:'complaint areas';
+    var tPos=posThemes[0]?posThemes[0].theme:'identified strengths';
+    action='Protect the strength in '+tPos.toLowerCase()+' while urgently resolving '+tNeg.toLowerCase()+' to shift sentiment from mixed to positive.';
+    if(isNegativeTone) action='URGENT: '+action;
+  }
+  return{category:category,sentimentLabel:sentimentLabel,sentimentScore:sentimentScore,reviewCount:reviewCount,confidence:confidence,tone:tone,posThemes:posThemes,negThemes:negThemes,response:response,action:action,isNegativeTone:isNegativeTone};
+}
+
+function renderResults(r){
+  document.getElementById('catPillWrap').innerHTML='';
+  document.getElementById('invalidCard').style.display='none';
+  document.getElementById('normalResults').style.display='block';
+  var catConfig={positive:{label:'POSITIVE',cls:'normal'},negative:{label:'NEGATIVE',cls:'garbage'},mixed:{label:'MIXED',cls:'mixed'},confusing:{label:'CONFUSING',cls:'weak'},garbage:{label:'GARBAGE',cls:'garbage'}};
+  var cc=catConfig[r.category]||{label:r.category.toUpperCase(),cls:'normal'};
+  var pill=document.createElement('div');
+  pill.className='cat-pill '+cc.cls;
+  pill.textContent='Category: '+cc.label;
+  document.getElementById('catPillWrap').appendChild(pill);
+  var barColor=r.category==='positive'?'#00e5a0':r.category==='negative'?'#ff6b6b':r.category==='garbage'?'#888':r.category==='confusing'?'#ffb547':'#4d9fff';
+  document.getElementById('scoreVal').innerHTML=r.category==='garbage'?'N/A':r.sentimentScore+'<sup>/10</sup>';
+  document.getElementById('scoreLabel').textContent=r.sentimentLabel;
+  document.getElementById('scoreBarFill').style.width=r.category==='garbage'?'0%':Math.round((r.sentimentScore/10)*100)+'%';
+  document.getElementById('scoreBarFill').style.background=barColor;
+  document.getElementById('reviewCount').textContent=r.category==='garbage'?'--':r.reviewCount;
+  var confColor=r.confidence==='High'?'#00e5a0':r.confidence==='Medium'?'#ffb547':'#ff6b6b';
+  document.getElementById('confidenceVal').textContent=r.category==='garbage'?'--':r.confidence;
+  document.getElementById('confidenceVal').style.color=r.category==='garbage'?'var(--text3)':confColor;
+  document.getElementById('confidenceSub').textContent=r.category==='garbage'?'invalid input':'analysis reliability';
+  document.getElementById('themesCount').textContent=r.category==='garbage'?'--':(r.posThemes.length+r.negThemes.length);
+  document.getElementById('themesSub').textContent=r.category==='garbage'?'--':r.posThemes.length+' pos \u00b7 '+r.negThemes.length+' neg';
+  var tc=r.tone?getToneConfig(r.tone):{icon:'\u26aa',label:'N/A',cls:'neutral',reason:'Tone not applicable for this category.'};
+  var toneCard=document.getElementById('toneCard');
+  toneCard.className='tone-card '+tc.cls;
+  document.getElementById('toneIcon').textContent=tc.icon;
+  var tl=document.getElementById('toneLabel');
+  tl.className='tone-label '+tc.cls;
+  tl.textContent='Customer Tone: '+tc.label;
+  document.getElementById('toneReason').textContent=tc.reason;
+  function renderThemeList(themes,rankColor,emptyMsg){
+    if(!themes||themes.length===0){return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.1" opacity="0.35"/><path d="M5 7h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity="0.35"/></svg><span style="font-size:13px;color:var(--text3);font-style:italic;">'+emptyMsg+'</span></div>';}
+    return themes.map(function(t,i){return '<div class="theme-item"><div class="theme-rank" style="color:'+rankColor+';">#'+(i+1)+'</div><div><div class="theme-name">'+t.theme+'</div><div class="theme-detail">'+t.evidence+'</div></div></div>';}).join('');
+  }
+  document.getElementById('posThemes').innerHTML=renderThemeList(r.posThemes,'#00e5a0',r.category==='negative'?'No positive themes identified — feedback is entirely negative.':'No positive themes detected.');
+  document.getElementById('negThemes').innerHTML=renderThemeList(r.negThemes,'#ff6b6b',r.category==='positive'?'No complaint themes identified — feedback is entirely positive.':'No complaint themes detected.');
+  var negPanel=document.getElementById('negPanel');
+  var negPanelLabel=document.getElementById('negPanelLabel');
+  if(r.isNegativeTone&&r.category==='negative'){negPanel.className='theme-panel urgent';negPanelLabel.className='theme-panel-label urgent';negPanelLabel.textContent='Complaint Themes (PRIORITY)';}
+  else{negPanel.className='theme-panel';negPanelLabel.className='theme-panel-label';negPanelLabel.textContent='Complaint Themes';}
+  var emotionCard=document.getElementById('emotionCard');
+  var eiMap={frustrated:{state:'Customers appear frustrated due to unmet expectations.',impact:'Risk of churn if not addressed promptly.'},angry:{state:'Customers are clearly angry. Serious breakdown in quality or service.',impact:'High churn risk. Likely to post public negative reviews.'},dissatisfied:{state:'Customers are highly dissatisfied. Complete failure to meet expectations.',impact:'URGENT: Significant risk of permanent customer loss and brand damage.'}};
+  var ei=eiMap[r.tone]||null;
+  if(ei&&r.isNegativeTone){
+    var sev=r.tone==='dissatisfied'?'urgent':'moderate';
+    emotionCard.className='emotion-card '+sev;emotionCard.style.display='block';
+    document.getElementById('emotionIcon').className='emotion-icon '+sev;
+    document.getElementById('emotionIcon').textContent=r.tone==='dissatisfied'?'\uD83D\uDEA8':'\u26A0\uFE0F';
+    var el=document.getElementById('emotionLabel');el.className='emotion-label '+sev;el.textContent='Customer Emotion Insight';
+    document.getElementById('emotionText').textContent=ei.state;
+    var imp=document.getElementById('emotionImpact');imp.className='emotion-impact '+sev;imp.textContent=ei.impact;
+  } else {emotionCard.style.display='none';}
+  var actionCard=document.getElementById('actionCard');
+  var actionIcon=document.getElementById('actionIcon');
+  var actionLabel=document.getElementById('actionLabel');
+  var actionText=document.getElementById('actionText');
+  if(r.isNegativeTone||r.category==='negative'){
+    actionCard.className='action-card urgent';actionIcon.className='action-icon urgent';
+    actionIcon.innerHTML='<svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px;"><path d="M7 2v5" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="11" r="1" fill="#ff6b6b"/><circle cx="7" cy="7" r="6" stroke="#ff6b6b" stroke-width="1.2"/></svg>';
+    actionLabel.className='action-label urgent';actionLabel.textContent='Response & Recommended Action';actionText.className='action-text urgent';
+  } else {
+    actionCard.className='action-card normal';actionIcon.className='action-icon normal';
+    actionIcon.innerHTML='<svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px;"><path d="M7 1L8.5 5H13L9.5 7.5L11 12L7 9.5L3 12L4.5 7.5L1 5H5.5L7 1Z" fill="#00e5a0"/></svg>';
+    actionLabel.className='action-label normal';actionLabel.textContent='Response & Recommended Action';actionText.className='action-text normal';
+  }
+  actionText.textContent=r.response+' '+r.action;
+  document.getElementById('analysisTime').textContent='Analyzed at '+new Date().toLocaleTimeString();
+  window._lastResult=r;
+}
+
+function analyzeText(){
+  var text=document.getElementById('reviewInput').value.trim();
+  if(!text){alert('Please paste some customer feedback first.');return;}
+  var r=runAnalysis(text);
+  var bannerEl=document.getElementById('categoryBanner');
+  var bannerMap={positive:{cls:'info',msg:'POSITIVE — Feedback is clearly positive. Only positive themes shown. No complaints forced.'},negative:{cls:'danger',msg:'NEGATIVE — Feedback is clearly negative. Only complaint themes shown. No positives forced.'},mixed:{cls:'info',msg:'MIXED — Both positive and negative sentiments exist. Both sides shown separately.'},confusing:{cls:'warn',msg:'CONFUSING — Input contains contradictions. Sentiment cannot be reliably determined.'},garbage:{cls:'danger',msg:'GARBAGE — Input is not valid customer feedback. No analysis performed.'}};
+  var bm=bannerMap[r.category];
+  if(bm){
+    bannerEl.className='category-banner '+bm.cls+' show';
+    document.getElementById('bannerText').textContent=bm.msg;
+    document.getElementById('bannerIcon').innerHTML=(r.category==='garbage'||r.category==='negative')?'<path d="M7.5 1L14 13H1L7.5 1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M7.5 6V9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="7.5" cy="11" r="0.6" fill="currentColor"/>':'<circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 6.5V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="4.5" r="0.6" fill="currentColor"/>';
+  } else {bannerEl.className='category-banner';}
+  var btn=document.getElementById('analyzeBtn');
+  btn.disabled=true;btn.textContent='Analyzing...';
+  document.getElementById('loadingBar').classList.add('active');
+  document.getElementById('loadingStatus').classList.add('active');
+  document.getElementById('results').classList.remove('visible');
+  setTimeout(function(){
+    renderResults(r);
+    document.getElementById('loadingBar').classList.remove('active');
+    document.getElementById('loadingStatus').classList.remove('active');
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M8 1L10 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H6L8 1Z" fill="currentColor"/></svg> Analyze Feedback';
+    document.getElementById('results').classList.add('visible');
+    document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+  },1800);
+}
+
+function copyResults(){
+  var r=window._lastResult; if(!r) return;
+  var tc=r.tone?getToneConfig(r.tone):{label:'N/A'};
+  var ts=document.getElementById('analysisTime').textContent;
+  var posLines=r.posThemes.length>0?r.posThemes.map(function(t,i){return '  #'+(i+1)+' '+t.theme+': '+t.evidence;}).join('\n'):'  No positive themes identified.';
+  var negLines=r.negThemes.length>0?r.negThemes.map(function(t,i){return '  #'+(i+1)+' '+t.theme+': '+t.evidence;}).join('\n'):'  No complaint themes identified.';
+  var out='FEEDBACKIQ - ANALYSIS RESULTS\n'+ts+'\n'+'_'.repeat(44)+'\n\nCATEGORY: '+r.sentimentLabel+'\nSCORE: '+(r.category==='garbage'?'N/A':r.sentimentScore+'/10')+'\nTONE: '+tc.label+'\nCONFIDENCE: '+(r.category==='garbage'?'N/A':r.confidence)+'\nREVIEWS: '+(r.category==='garbage'?'N/A':r.reviewCount)+'\n\nPOSITIVE THEMES:\n'+posLines+'\n\nCOMPLAINT THEMES:\n'+negLines+'\n\nRESPONSE & ACTION:\n  '+r.response+'\n  '+r.action+'\n\n'+'_'.repeat(44)+'\nDISCLAIMER: AI-generated. Human review required.\nFeedbackIQ | BUS 631 | William Jessup University';
+  navigator.clipboard.writeText(out).then(function(){
+    var btn=document.getElementById('exportBtn');
+    btn.classList.add('export-copied');
+    btn.innerHTML='<svg viewBox="0 0 13 13" fill="none" width="13" height="13"><path d="M2 7L5 10L11 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!';
+    setTimeout(function(){btn.classList.remove('export-copied');btn.innerHTML='<svg viewBox="0 0 13 13" fill="none" width="13" height="13"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 3V2.5A1.5 1.5 0 015.5 1h5A1.5 1.5 0 0112 2.5v5A1.5 1.5 0 0110.5 9H10" stroke="currentColor" stroke-width="1.2"/></svg> Copy Results';},2500);
+  }).catch(function(){alert('Copy failed. Please copy manually.');});
+}
+
+var selectedRating=0;
+function selectRating(btn,val){selectedRating=val;document.querySelectorAll('.rating-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}
+function submitFeedback(){
+  var comment=document.getElementById('fbComment').value.trim();
+  if(!selectedRating&&!comment){alert('Please select a rating or leave a comment.');return;}
+
+  var submitBtn=document.querySelector('.submit-btn');
+  submitBtn.textContent='Sending...';
+  submitBtn.disabled=true;
+
+  var formData=new FormData();
+  formData.append('name', document.getElementById('fbName').value.trim()||'Anonymous');
+  formData.append('email', document.getElementById('fbEmail').value.trim()||'Not provided');
+  formData.append('rating', selectedRating+' out of 5');
+  formData.append('comment', comment||'No comment provided');
+  formData.append('_subject', 'FeedbackIQ Rating Submission — BUS 631');
+
+  fetch('https://formspree.io/f/xkokqgyl',{
+    method:'POST',
+    body:formData,
+    headers:{Accept:'application/json'}
+  }).then(function(res){
+    if(res.ok){
+      document.getElementById('feedbackForm').style.display='none';
+      document.getElementById('ratingRow').style.display='none';
+      document.getElementById('feedbackSuccess').classList.add('show');
+    } else {
+      res.json().then(function(data){
+        var msg=data&&data.errors?data.errors.map(function(e){return e.message;}).join(', '):'Submission failed. Please try again.';
+        alert('Error: '+msg);
+        submitBtn.textContent='Submit feedback';
+        submitBtn.disabled=false;
+      });
+    }
+  }).catch(function(){
+    alert('Network error. Please check your internet connection and try again.');
+    submitBtn.textContent='Submit feedback';
+    submitBtn.disabled=false;
+  });
+}
+</script>
+</body>
+</html>
